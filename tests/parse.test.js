@@ -58,3 +58,15 @@ test('row=4 col=2 (ALT thumb) has Base label ALT', () => {
   const key = result.keys.find(k => k.row === 4 && k.col === 2);
   assert.equal(key.layers['Base'], 'ALT');
 });
+
+test('row=3 col=0 (shift_td) has Base label SHF', () => {
+  result = result || parseKeymap(KEYMAP);
+  const key = result.keys.find(k => k.row === 3 && k.col === 0);
+  assert.equal(key.layers['Base'], 'SHF');
+});
+
+test('row=3 col=2 (quote_morph) has Base label \'', () => {
+  result = result || parseKeymap(KEYMAP);
+  const key = result.keys.find(k => k.row === 3 && k.col === 2);
+  assert.equal(key.layers['Base'], "'");
+});

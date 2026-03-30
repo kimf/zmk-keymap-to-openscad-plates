@@ -87,23 +87,43 @@ function sliceBindingsByRow(flatBindings, bindingsPerRow) {
  */
 function extractBehaviors(src) {
   const behaviors = {};
-  const behaviorBlock = src.match(/behaviors\s*\{([\s\S]*?)\n\t\};/);
-  if (!behaviorBlock) return behaviors;
+  // Extract the behaviors { } block using brace depth (same approach as extractKeymapBlock)
+  const start = src.indexOf('behaviors {');
+  if (start === -1) return behaviors;
+  let depth = 0, i = start;
+  let inLineComment = false;
+  while (i < src.length) {
+    if (!inLineComment && src[i] === '/' && src[i + 1] === '/') { inLineComment = true; i++; continue; }
+    if (inLineComment && src[i] === '\n') { inLineComment = false; i++; continue; }
+    if (!inLineComment) {
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}') { depth--; if (depth === 0) break; }
+    }
+    i++;
+  }
+  const block = src.slice(start, i + 1);
 
-  const tdRe = /(\w+):\s*\w+\s*\{[\s\S]*?compatible\s*=\s*"zmk,behavior-tap-dance"[\s\S]*?bindings\s*=\s*<([\s\S]*?)>;/g;
+  // Each behavior sub-block: name: alias { ... } — constrained to one brace level ([^{}]*)
+  const tdRe = /(\w+):\s*\w+\s*\{[^{}]*?compatible\s*=\s*"zmk,behavior-tap-dance"[^{}]*?bindings\s*=\s*<([\s\S]*?)>;/g;
   let m;
-  while ((m = tdRe.exec(behaviorBlock[1]))) {
+  while ((m = tdRe.exec(block))) {
     behaviors[m[1]] = {
       type: 'tap-dance',
-      bindings: m[2].replace(/\n/g, ' ').trim().split(/,\s*/).map(s => s.trim()).filter(Boolean),
+      bindings: m[2].replace(/\n/g, ' ').trim()
+        .split(/[>,]\s*<?\s*/)          // split on ">, <" or "," separators
+        .map(s => s.replace(/^[<\s]+|[>\s]+$/g, '').trim())  // strip < > and whitespace
+        .filter(Boolean),
     };
   }
 
-  const mmRe = /(\w+):\s*\w+\s*\{[\s\S]*?compatible\s*=\s*"zmk,behavior-mod-morph"[\s\S]*?bindings\s*=\s*<([\s\S]*?)>;/g;
-  while ((m = mmRe.exec(behaviorBlock[1]))) {
+  const mmRe = /(\w+):\s*\w+\s*\{[^{}]*?compatible\s*=\s*"zmk,behavior-mod-morph"[^{}]*?bindings\s*=\s*<([\s\S]*?)>;/g;
+  while ((m = mmRe.exec(block))) {
     behaviors[m[1]] = {
       type: 'mod-morph',
-      bindings: m[2].replace(/\n/g, ' ').trim().split(/,\s*/).map(s => s.trim()).filter(Boolean),
+      bindings: m[2].replace(/\n/g, ' ').trim()
+        .split(/[>,]\s*<?\s*/)
+        .map(s => s.replace(/^[<\s]+|[>\s]+$/g, '').trim())
+        .filter(Boolean),
     };
   }
 
@@ -112,14 +132,15 @@ function extractBehaviors(src) {
 
 /**
  * Extract macros and their output labels from their comment (/* Outputs: "…" *\/)
- * In the keymap file the comment appears INSIDE the macro block, after `compatible`.
- * Capture order: node name first, then the Outputs comment inside the block.
+ * In olik.keymap the Outputs comment appears BEFORE `compatible` inside the block.
+ * Capture order: node name first, then the Outputs comment, then compatible.
  * Returns { macroName: label }
  */
 function extractMacros(src) {
   const macros = {};
-  // Match: nodeName: alias { ... compatible = "zmk,behavior-macro" ... /* Outputs: "..." */ ... }
-  const re = /(\w+):\s*\w+\s*\{[^{}]*?compatible\s*=\s*"zmk,behavior-macro"[^{}]*?\/\*\s*Outputs:\s*"([^"]+)"\s*\*\//g;
+  // In olik.keymap the Outputs comment appears BEFORE compatible inside the block.
+  // Pattern: nodeName: alias { /* Outputs: "..." */ ... compatible = "zmk,behavior-macro" ... }
+  const re = /(\w+):\s*\w+\s*\{[^{}]*?\/\*\s*Outputs:\s*"([^"]+)"\s*\*\/[^{}]*?compatible\s*=\s*"zmk,behavior-macro"/g;
   let m;
   while ((m = re.exec(src))) macros[m[1]] = m[2];
   return macros;
@@ -140,8 +161,8 @@ function parseKeymap(keymapPath) {
 
   const keymapBlock  = extractKeymapBlock(src);
   const layerBlocks  = extractNamedBlocks(keymapBlock);
-  // The first key is always 'compatible' — skip it; remaining are layer nodes
-  const layerEntries = Object.entries(layerBlocks).filter(([k]) => k !== 'compatible');
+  // extractNamedBlocks only captures name { } blocks — the compatible property line is not a block
+  const layerEntries = Object.entries(layerBlocks);
 
   const layerNames    = layerEntries.map(([nodeName, content]) => extractDisplayName(content, nodeName));
   // Split each layer's flat binding array into per-row slices so that
