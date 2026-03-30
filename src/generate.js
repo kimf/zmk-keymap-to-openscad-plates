@@ -26,7 +26,8 @@ function buildScad(keymapData, config) {
 
   const primaryH   = legends.primaryLayers   * lh;
   const secondaryH = legends.secondaryLayers * lh;
-  const swapH      = +(ph + secondaryH / 2).toFixed(4);
+  // Legends start at z=0 (key face on print bed). Swap before secondary legends finish.
+  const swapH      = +(secondaryH / 2).toFixed(4);
 
   const lines = [];
 
@@ -47,36 +48,41 @@ function buildScad(keymapData, config) {
 
   // ── Colour layering guide
   lines.push('// === Colour layering guide ===');
-  lines.push(`// Filament swap at: ${swapH}mm  (plate_h + secondary_layers * layer_h / 2)`);
+  lines.push(`// Print FACE DOWN (key face on print bed). Start with contrast filament, swap to base colour at:`);
+  lines.push(`// Filament swap at: ${swapH}mm  (secondary_layers * layer_h / 2)`);
   lines.push('// At this height:');
   lines.push(`//   Secondary (corner) legends are ~50% printed → faded`);
   lines.push(`//   Primary legends are ~${Math.round((secondaryH / 2 / primaryH) * 100)}% started → predominantly contrast colour`);
-  lines.push('// Use your slicer\'s "pause at layer" feature at the swap height above.');
+  lines.push('// Use your slicer\'s "pause at layer" / "colour change" feature at the swap height above.');
   lines.push('');
 
   // ── Modules
   lines.push('// === Modules ===');
   lines.push('');
   lines.push('module rounded_rect(w, h, r, height) {');
-  lines.push('  linear_extrude(height)');
-  lines.push('    offset(r) offset(-r) square([w - 2*r, h - 2*r], center=true);');
+  lines.push('  translate([-w/2, -h/2, 0])');
+  lines.push('  hull() {');
+  lines.push('    translate([r,   r,   0]) cylinder(h=height, r=r, $fn=32);');
+  lines.push('    translate([w-r, r,   0]) cylinder(h=height, r=r, $fn=32);');
+  lines.push('    translate([r,   h-r, 0]) cylinder(h=height, r=r, $fn=32);');
+  lines.push('    translate([w-r, h-r, 0]) cylinder(h=height, r=r, $fn=32);');
+  lines.push('  }');
   lines.push('}');
   lines.push('');
   lines.push('module key_cap (primary, top_left, top_right, bottom_right) {');
-  lines.push('  // Base plate');
+  lines.push('  // Base plate — printed face down; legends start at z=0 (key face on print bed)');
   lines.push('  rounded_rect(key_w, key_h, key_radius, plate_h);');
-  lines.push('  // Primary legend — centered, tall (contrast colour)');
-  lines.push('  translate([0, 0, plate_h])');
-  lines.push('    linear_extrude(primary_layers * layer_h)');
-  lines.push('      text(primary, size=primary_font_size, font=font, halign="center", valign="center");');
-  lines.push('  // Corner legends — small, short (faded)');
-  lines.push('  translate([-(key_w/2 - 2), key_h/2 - 3, plate_h])');
+  lines.push('  // Primary legend — centered, tall (contrast colour, at key face)');
+  lines.push('  linear_extrude(primary_layers * layer_h)');
+  lines.push('    text(primary, size=primary_font_size, font=font, halign="center", valign="center");');
+  lines.push('  // Corner legends — small, short (faded, at key face)');
+  lines.push('  translate([-(key_w/2 - 2), key_h/2 - 3, 0])');
   lines.push('    linear_extrude(secondary_layers * layer_h)');
   lines.push('      text(top_left, size=secondary_font_size, font=font, halign="left", valign="top");');
-  lines.push('  translate([key_w/2 - 2, key_h/2 - 3, plate_h])');
+  lines.push('  translate([key_w/2 - 2, key_h/2 - 3, 0])');
   lines.push('    linear_extrude(secondary_layers * layer_h)');
   lines.push('      text(top_right, size=secondary_font_size, font=font, halign="right", valign="top");');
-  lines.push('  translate([key_w/2 - 2, -(key_h/2 - 3), plate_h])');
+  lines.push('  translate([key_w/2 - 2, -(key_h/2 - 3), 0])');
   lines.push('    linear_extrude(secondary_layers * layer_h)');
   lines.push('      text(bottom_right, size=secondary_font_size, font=font, halign="right", valign="bottom");');
   lines.push('}');

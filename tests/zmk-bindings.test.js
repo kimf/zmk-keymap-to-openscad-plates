@@ -41,6 +41,6 @@ test('&bt BT_NXT → BT▶',               () => assert.equal(resolveBinding('&b
 test('&shift_td → SHF (first binding)', () => assert.equal(resolveBinding('&shift_td', ctx),           'SHF'));
 test('&quote_morph → \' (first binding)', () => assert.equal(resolveBinding('&quote_morph', ctx),      "'"));
 test('&at_gmail_td → @ (first binding)', () => assert.equal(resolveBinding('&at_gmail_td', ctx),       '@'));
-test('&macro_gmail → @gmail.com',        () => assert.equal(resolveBinding('&macro_gmail', ctx),       '@gmail.com'));
+test('&macro_gmail → empty (macros have no key cap label)', () => assert.equal(resolveBinding('&macro_gmail', ctx), ''));
 test('&msc MOVE_UP → empty',             () => assert.equal(resolveBinding('&msc MOVE_UP', ctx),       ''));
 test('&inc_dec_kp A B → empty',          () => assert.equal(resolveBinding('&inc_dec_kp A B', ctx),    ''));

@@ -40,7 +40,7 @@ function resolveBinding(binding, ctx) {
   if (head === '&msc' || head === '&inc_dec_kp') return '';
 
   if (head === '&kp' || head === '&sk') {
-    const raw   = parts.slice(1).join(' ');
+    const raw   = parts[1];                 // only the key token, not any trailing macro refs
     const inner = stripModifiers(raw);
     return resolveKey(inner, overrides);
   }
@@ -74,9 +74,9 @@ function resolveBinding(binding, ctx) {
     return resolveBinding(b.bindings[0], ctx);
   }
 
-  // Named macro reference (e.g. &macro_gmail)
+  // Named macro reference (e.g. &macro_gmail) — macros don't need a key cap label
   const macroName = head.slice(1);
-  if (macros[macroName] !== undefined) return macros[macroName];
+  if (macros[macroName] !== undefined) return '';
 
   return '';
 }

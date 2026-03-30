@@ -32,8 +32,8 @@ test('output contains key_w parameter', () => {
 
 test('output contains filament swap comment', () => {
   scad = scad || buildScad(keymapData, config);
-  // swap = 0.40 + (1 * 0.08) / 2 = 0.44
-  assert.ok(scad.includes('0.44'), 'should include swap height 0.44mm');
+  // swap = (1 * 0.08) / 2 = 0.04  (legends at z=0, debossed face-down technique)
+  assert.ok(scad.includes('0.04'), 'should include swap height 0.04mm');
 });
 
 test('output contains rounded_rect module', () => {
