@@ -21,7 +21,7 @@ function resolveKey(name, overrides) {
   if (svKeys[name] !== undefined)    return svKeys[name];
   if (overrides[name] !== undefined) return overrides[name];
   // Single letters stay as-is; multi-word names are returned verbatim
-  return name.length === 1 ? name : name;
+  return name;
 }
 
 /**
@@ -64,7 +64,7 @@ function resolveBinding(binding, ctx) {
     if (sub === 'BT_CLR_ALL') return 'BT-ALL';
     if (sub === 'BT_PRV')     return 'BT◀';
     if (sub === 'BT_NXT')     return 'BT▶';
-    return 'BT';
+    return '';  // unknown BT sub-command — show nothing
   }
 
   // Named behavior reference (e.g. &shift_td, &quote_morph)
