@@ -4,31 +4,38 @@ const { resolveBinding } = require('./zmk-bindings');
 const { ROWS, COLS, BINDINGS_PER_ROW, getRowZones } = require('./layout-map');
 
 /**
- * Extract the inner content of the keymap { ... } block from a .keymap file.
- * Skips // line comments so brace characters in comments don't skew depth.
- * Returns only the content between the outer braces (not the 'keymap { }' wrapper).
+ * Extract the full { ... } block beginning at the first occurrence of `marker` in src.
+ * Returns the slice from `marker` through and including the closing brace.
+ * Skips // line comments so braces in comments don't skew depth.
+ * Returns null if the marker is not found.
+ * Throws if the block is unterminated.
  */
-function extractKeymapBlock(src) {
-  const start = src.indexOf('keymap {');
-  if (start === -1) throw new Error('No keymap { block found');
+function extractBlock(src, marker) {
+  const start = src.indexOf(marker);
+  if (start === -1) return null;
   let depth = 0, i = start;
-  let blockStart = -1;
   while (i < src.length) {
-    // Skip // line comments
     if (src[i] === '/' && src[i + 1] === '/') {
       while (i < src.length && src[i] !== '\n') i++;
       continue;
     }
-    if (src[i] === '{') {
-      depth++;
-      if (depth === 1) blockStart = i + 1; // content starts after the opening brace
-    } else if (src[i] === '}') {
-      depth--;
-      if (depth === 0) return src.slice(blockStart, i); // return inner content only
-    }
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}') { depth--; if (depth === 0) return src.slice(start, i + 1); }
     i++;
   }
-  throw new Error('Unterminated keymap block');
+  throw new Error(`Unterminated block starting with '${marker}'`);
+}
+
+/**
+ * Extract the inner content of the keymap { ... } block from a .keymap file.
+ * Returns only the content between the outer braces (not the 'keymap { }' wrapper).
+ */
+function extractKeymapBlock(src) {
+  const block = extractBlock(src, 'keymap {');
+  if (!block) throw new Error('No keymap { block found');
+  // Return the inner content (between the outer braces) for extractNamedBlocks
+  const inner = block.slice(block.indexOf('{') + 1, block.lastIndexOf('}'));
+  return inner;
 }
 
 /**
@@ -87,21 +94,8 @@ function sliceBindingsByRow(flatBindings, bindingsPerRow) {
  */
 function extractBehaviors(src) {
   const behaviors = {};
-  // Extract the behaviors { } block using brace depth (same approach as extractKeymapBlock)
-  const start = src.indexOf('behaviors {');
-  if (start === -1) return behaviors;
-  let depth = 0, i = start;
-  let inLineComment = false;
-  while (i < src.length) {
-    if (!inLineComment && src[i] === '/' && src[i + 1] === '/') { inLineComment = true; i++; continue; }
-    if (inLineComment && src[i] === '\n') { inLineComment = false; i++; continue; }
-    if (!inLineComment) {
-      if (src[i] === '{') depth++;
-      else if (src[i] === '}') { depth--; if (depth === 0) break; }
-    }
-    i++;
-  }
-  const block = src.slice(start, i + 1);
+  const block = extractBlock(src, 'behaviors {');
+  if (!block) return behaviors;
 
   // Each behavior sub-block: name: alias { ... } — constrained to one brace level ([^{}]*)
   const tdRe = /(\w+):\s*\w+\s*\{[^{}]*?compatible\s*=\s*"zmk,behavior-tap-dance"[^{}]*?bindings\s*=\s*<([\s\S]*?)>;/g;
@@ -138,11 +132,12 @@ function extractBehaviors(src) {
  */
 function extractMacros(src) {
   const macros = {};
-  // In olik.keymap the Outputs comment appears BEFORE compatible inside the block.
-  // Pattern: nodeName: alias { /* Outputs: "..." */ ... compatible = "zmk,behavior-macro" ... }
+  const block = extractBlock(src, 'macros {');
+  if (!block) return macros;
+  // Outputs comment appears BEFORE compatible inside each macro sub-block
   const re = /(\w+):\s*\w+\s*\{[^{}]*?\/\*\s*Outputs:\s*"([^"]+)"\s*\*\/[^{}]*?compatible\s*=\s*"zmk,behavior-macro"/g;
   let m;
-  while ((m = re.exec(src))) macros[m[1]] = m[2];
+  while ((m = re.exec(block))) macros[m[1]] = m[2];
   return macros;
 }
 
@@ -198,14 +193,18 @@ function parseKeymap(keymapPath) {
   return { layerNames, grid: { rows: ROWS, cols: COLS }, keys };
 }
 
-// CLI entry point
 if (require.main === module) {
   const [,, keymapFile] = process.argv;
   if (!keymapFile) { console.error('Usage: node src/parse.js <keymap-file>'); process.exit(1); }
-  const result = parseKeymap(path.resolve(keymapFile));
-  const out    = path.resolve(path.dirname(keymapFile), 'keymap.json');
-  fs.writeFileSync(out, JSON.stringify(result, null, 2));
-  console.log(`Written to ${out}`);
+  try {
+    const result = parseKeymap(path.resolve(keymapFile));
+    const out = path.resolve(path.dirname(keymapFile), 'keymap.json');
+    fs.writeFileSync(out, JSON.stringify(result, null, 2));
+    console.log(`Written to ${out}`);
+  } catch (err) {
+    console.error(`Error: ${err.message}`);
+    process.exit(1);
+  }
 }
 
 module.exports = { parseKeymap };
