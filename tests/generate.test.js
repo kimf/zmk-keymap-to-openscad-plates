@@ -84,3 +84,13 @@ test('corner label from layer 1 is second arg', () => {
   scad = scad || buildScad(keymapData, config);
   assert.ok(scad.includes('"!"'), 'corner label ! present');
 });
+
+test('missing layer keys render as empty strings', () => {
+  const data = {
+    layerNames: ['Base', 'Shift', 'Alt', 'Ctrl'],
+    grid: { rows: 1, cols: 1 },
+    keys: [{ row: 0, col: 0, empty: false, layers: { Base: 'Q' } }],
+  };
+  const s = buildScad(data, config);
+  assert.ok(s.includes('key_cap("Q", "", "", "")'), 'missing layers should render as empty strings');
+});

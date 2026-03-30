@@ -5,7 +5,12 @@ const path = require('path');
  * Escape a string for use inside an OpenSCAD string literal.
  */
 function scadStr(s) {
-  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return s
+    .replace(/\\/g, '\\\\')   // backslash first
+    .replace(/"/g, '\\"')      // double quote
+    .replace(/\n/g, '\\n')     // newline
+    .replace(/\t/g, '\\t')     // tab
+    .replace(/\r/g, '\\r');    // carriage return
 }
 
 /**
