@@ -1,0 +1,51 @@
+{
+  "print": {
+    "layerHeight": 0.08
+  },
+  "key": {
+    "width": 16,
+    "height": 16,
+    "radius": 2,
+    "plateHeight": 0.40,
+    "gap": 1
+  },
+  "legends": {
+    "primaryLayers": 4,
+    "secondaryLayers": 1,
+    "primaryFontSize": 6,
+    "secondaryFontSize": 2.5,
+    "font": "Liberation Sans:style=Bold"
+  },
+  "labelOverrides": {
+    "LEFT_ALT": "ALT",
+    "LEFT_GUI": "CMD",
+    "LEFT_CTRL": "CTL",
+    "LCTRL": "CTL",
+    "LSHIFT": "SHF",
+    "BACKSPACE": "⌫",
+    "ESCAPE": "ESC",
+    "ENTER": "ENT",
+    "DELETE": "DEL",
+    "TAB": "TAB",
+    "SPACE": "SPC",
+    "PAGE_UP": "PGU",
+    "PAGE_DOWN": "PGD",
+    "HOME": "HOM",
+    "END": "END",
+    "UP": "↑",
+    "DOWN": "↓",
+    "LEFT": "←",
+    "RIGHT": "→",
+    "COMMA": ",",
+    "DOT": ".",
+    "GRAVE": "`",
+    "CAPS": "CAPS",
+    "C_PLAY_PAUSE": "▶⏸",
+    "C_PLAY": "▶",
+    "C_VOL_UP": "VOL+",
+    "C_VOL_DN": "VOL-",
+    "C_MUTE": "MUTE",
+    "C_PREV": "⏮",
+    "C_NEXT": "⏭"
+  }
+}
