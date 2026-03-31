@@ -1,9 +1,13 @@
 import { useKeyboardStore } from './store.js'
-import KeyGrid from './components/KeyGrid/index.jsx'
 import TopBar from './components/TopBar/index.jsx'
+import KeyGrid from './components/KeyGrid/index.jsx'
+import KeyEditor from './components/KeyEditor/index.jsx'
+import '@fontsource/fira-code'
+import '@fontsource/staatliches'
 
 export default function App() {
-  const keymapData = useKeyboardStore(s => s.keymapData)
+  const keymapData  = useKeyboardStore(s => s.keymapData)
+  const selectedKey = useKeyboardStore(s => s.selectedKey)
 
   return (
     <div className="app-shell">
@@ -11,7 +15,7 @@ export default function App() {
       <div className="main-layout">
         <div className="left-panel">
           {keymapData
-            ? <KeyGrid />
+            ? (selectedKey ? <KeyEditor /> : <KeyGrid />)
             : <p style={{ padding: '20px', color: '#555' }}>Load a .keymap file to begin</p>
           }
         </div>

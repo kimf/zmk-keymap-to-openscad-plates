@@ -1,0 +1,52 @@
+.editor { display: flex; flex-direction: column; height: 100%; padding: 12px; gap: 10px; }
+
+.header { display: flex; align-items: center; gap: 8px; }
+.backBtn { background: none; border: none; color: #4a9eff; cursor: pointer; font-size: 16px; padding: 2px 6px; }
+.keyLabel { font-size: 13px; font-weight: bold; color: #fff; }
+.rowCol { font-size: 10px; color: #666; }
+
+.diagram { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.diagCell {
+  background: #1a1a2e; border: 1px solid #2a3a5a; border-radius: 4px;
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 9px; color: #666; transition: all 0.1s;
+}
+.diagCell:hover { border-color: #4a9eff; }
+.diagCellActive { background: #1e2a4e; border-color: #3a6aaa; color: #ccc; }
+.diagCellFocused { border-color: #4a9eff !important; background: #1a3a6e !important; color: #fff !important; }
+.diagCenterCell { font-size: 14px; }
+
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tab {
+  background: #1a1a2e; border: 1px solid #2a3a5a; border-radius: 4px;
+  padding: 4px 10px; font-size: 11px; color: #888; cursor: pointer;
+}
+.tabActive { border-color: #4a9eff; background: #1a2a4e; color: #fff; }
+
+.slotEditor { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.row { display: flex; gap: 6px; align-items: center; }
+.label { font-size: 10px; color: #666; min-width: 60px; }
+.typeToggle { display: flex; gap: 4px; }
+.typeBtn {
+  background: #1a1a2e; border: 1px solid #2a3a5a; border-radius: 3px;
+  padding: 3px 8px; font-size: 10px; color: #888; cursor: pointer;
+}
+.typeBtnActive { border-color: #4a9eff; background: #1a2a4e; color: #fff; }
+
+.textInput {
+  width: 100%; background: #0f1525; border: 1px solid #3a4a7a;
+  border-radius: 4px; padding: 6px 8px; color: #fff; font-size: 13px;
+  font-family: 'Hack Nerd Font Mono', monospace; outline: none;
+}
+.textInput:focus { border-color: #4a9eff; }
+
+.iconGrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.iconCell {
+  background: #1a1a2e; border: 1px solid #2a3a5a; border-radius: 3px;
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; font-family: 'Hack Nerd Font Mono', monospace;
+}
+.iconCell:hover, .iconCellSelected { border-color: #4a9eff; background: #1a2a4e; }
+
+.activeToggle { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #888; }
+.activeToggle input { cursor: pointer; }
