@@ -1,11 +1,13 @@
 import { useKeyboardStore } from './store.js'
 import KeyGrid from './components/KeyGrid/index.jsx'
+import TopBar from './components/TopBar/index.jsx'
 
 export default function App() {
   const keymapData = useKeyboardStore(s => s.keymapData)
 
   return (
     <div className="app-shell">
+      <TopBar />
       <div className="main-layout">
         <div className="left-panel">
           {keymapData
