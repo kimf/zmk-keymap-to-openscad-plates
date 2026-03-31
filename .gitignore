@@ -1,4 +1,5 @@
 node_modules/
 keymap.json
-output.scad
+output.*
 .superpowers/
+.DS_Store
