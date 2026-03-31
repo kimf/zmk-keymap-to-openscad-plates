@@ -1,12 +1,17 @@
 const { strict: assert } = require('assert');
 const { test } = require('node:test');
-const { buildScad } = require('../src/generate');
+const { buildScad, scadArg } = require('../src/generate');
 
 const config = {
-  print:   { layerHeight: 0.08 },
-  key:     { width: 16, height: 16, radius: 2, plateHeight: 0.40, gap: 1 },
-  legends: { primaryLayers: 4, secondaryLayers: 1, primaryFontSize: 6, secondaryFontSize: 2.5, font: 'Liberation Sans:style=Bold' },
-  labelOverrides: {},
+  key:     { width: 16, height: 16, radius: 2, plateHeight: 0.8, gap: 1 },
+  legends: {
+    primaryDepth: 0.4, secondaryDepth: 0.2, thirdDepth: 0.1,
+    primaryFontSize: 5.2, secondaryFontSize: 3.1, thirdFontSize: 2.0,
+    font: 'Hack Nerd Font Mono:style=Bold', smallFont: 'Hack Nerd Font',
+    pYOffset: 0,
+  },
+  colors:  { base: 'black', legend: 'white', accent: 'gray' },
+  icons:   {},
 };
 
 const keymapData = {
@@ -26,14 +31,12 @@ test('buildScad returns a string', () => {
 
 test('output contains key_w parameter', () => {
   scad = scad || buildScad(keymapData, config);
-  // Generator may pad the assignment for alignment — match the value, not exact spacing
   assert.ok(/key_w\s*=\s*16/.test(scad), 'should set key_w = 16');
 });
 
-test('output contains filament swap comment', () => {
+test('output contains MMU export comment', () => {
   scad = scad || buildScad(keymapData, config);
-  // swap = (1 * 0.08) / 2 = 0.04  (legends at z=0, debossed face-down technique)
-  assert.ok(scad.includes('0.04'), 'should include swap height 0.04mm');
+  assert.ok(scad.includes('MMU export'), 'should include MMU export section');
 });
 
 test('output contains rounded_rect module', () => {
@@ -48,7 +51,17 @@ test('output contains key_cap module', () => {
 
 test('output does not contain dead key_legend module', () => {
   scad = scad || buildScad(keymapData, config);
-  assert.ok(!scad.includes('module key_legend'), 'key_legend should not appear — it was removed as dead code');
+  assert.ok(!scad.includes('module key_legend'), 'key_legend should not appear');
+});
+
+test('key_cap module uses difference() for plate cutouts', () => {
+  scad = scad || buildScad(keymapData, config);
+  assert.ok(scad.includes('difference()'), 'plate should use difference() to carve legends');
+});
+
+test('layout is wrapped in mirror([1, 0, 0])', () => {
+  scad = scad || buildScad(keymapData, config);
+  assert.ok(scad.includes('mirror([1, 0, 0])'), 'layout must be mirrored for face-down printing');
 });
 
 test('output contains translate for key at col=0', () => {
@@ -61,6 +74,21 @@ test('output contains translate for key at col=1 (x = key_w + gap = 17)', () => 
   assert.ok(scad.includes('translate([17,'), 'col 1 translate at x=17');
 });
 
+test('right-half key (col >= 6) is offset by halveGap', () => {
+  const data = {
+    layerNames: ['Base'],
+    grid: { rows: 1, cols: 12 },
+    keys: [
+      { row: 0, col: 5, empty: false, layers: { Base: 'L' } },
+      { row: 0, col: 6, empty: false, layers: { Base: 'R' } },
+    ],
+  };
+  const cfg = { ...config, key: { ...config.key, halveGap: 20 } };
+  const s = buildScad(data, cfg);
+  assert.ok(s.includes('translate([85,'),  'left half col 5 at x=85');
+  assert.ok(s.includes('translate([122,'), 'right half col 6 at x = 6*17 + 20 = 122');
+});
+
 test('empty keys are not rendered', () => {
   const data = {
     layerNames: ['Base'],
@@ -71,7 +99,6 @@ test('empty keys are not rendered', () => {
     ],
   };
   const s = buildScad(data, config);
-  // Only one key_cap call
   assert.equal((s.match(/key_cap\(/g) || []).length, 1);
 });
 
@@ -94,3 +121,13 @@ test('missing layer keys render as empty strings', () => {
   const s = buildScad(data, config);
   assert.ok(s.includes('key_cap("Q", "", "", "")'), 'missing layers should render as empty strings');
 });
+
+// ── scadArg unit tests
+test('scadArg: empty string → ""', () => assert.equal(scadArg(''), '""'));
+test('scadArg: plain text → quoted string', () => assert.equal(scadArg('A'), '"A"'));
+test('scadArg: $ symbol (not a varref) → quoted string', () => assert.equal(scadArg('$'), '"$"'));
+test('scadArg: $varname → unquoted variable ref', () => assert.equal(scadArg('$ic_shf'), 'ic_shf'));
+test('scadArg: BT0 → str(ic_bt,"")', () => assert.equal(scadArg('BT0'), 'str(ic_bt,"")'));
+test('scadArg: BT3 → str with number', () => assert.equal(scadArg('BT3'), 'str(ic_bt," 3")'));
+test('scadArg: BT-CLR → str clr expr', () => assert.equal(scadArg('BT-CLR'), 'str(ic_bt," clr")'));
+test('scadArg: BT◀ → str prv expr', () => assert.equal(scadArg('BT\u25c0'), 'str(ic_bt," prv")'));

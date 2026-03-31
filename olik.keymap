@@ -222,16 +222,16 @@
 		
 		// -----------------------------------------------------------------------------------------
 		// | ESC   |     |     |     |     |  '   |          |  !  |  &  |  $  |  /  |  `     | DEL |
-		// | TAB   |     |     |  }  |  ]  |  )  |   SCROLL | (   |  [  |  {  |  +  |  #     |  ?  |
+		// | TAB   |  <  |  >   |  }  |  ]  |  )  |   SCROLL | (   |  [  |  {  |  +  |  #     |  ?  |
 		// |       |   ´  |  ¤   |     |  ^  |  @  |          |  ~  |  =  |  ,  |  .  |  PGUP  |  -   |
 		// | SHIFT |  CTRL | € |                                                 | HOME | PGDOWN | END|
 		//                     | ALT | GUI | SPACE |        | SPACE (MEDIA) | LSENTER | SHIFT |
 		sym {
 			display-name = "Symbols";
 			bindings = <
-			&trans  &trans        &trans          &trans              &trans         &quote_morph                  &kp SV_EXCL      &kp SV_AMPS  &kp SV_DLLR  &kp SV_SLASH &kp GRAVE      &kp DELETE
-			&trans  &trans        &trans          &kp LS(LA(SV_N9))   &kp LA(SV_N9)  &kp SV_RPAR           &trans  &lpar_td         &lbkt_td     &lbrc_td     &kp SV_PLUS  &kp SV_HASH    &kp SV_QMARK
-			&trans                &trans          &kp SV_ACUTE        &kp SV_CARET   &at_gmail_td                  &tilde_home_td   &kp SV_EQUAL &trans       &trans       &kp PAGE_UP    &trans
+			&trans  &trans        	&trans          &trans              &trans         &quote_morph                  &kp SV_EXCL      &kp SV_AMPS  &kp SV_DLLR  &kp SV_SLASH &kp GRAVE      &kp DELETE
+			&trans  &open_croc_td   &close_croc_td  &kp LS(LA(SV_N9))   &kp LA(SV_N9)  &kp SV_RPAR           &trans  &lpar_td         &lbkt_td     &lbrc_td     &kp SV_PLUS  &kp SV_HASH    &kp SV_QMARK
+			&trans                	&trans          &kp SV_ACUTE        &kp SV_CARET   &at_gmail_td                  &tilde_home_td   &kp SV_EQUAL &trans       &trans       &kp PAGE_UP    &trans
 			&trans  &trans  &kp LA(SV_N4)                                                                                                                     &kp HOME     &kp PAGE_DOWN  &kp END
 			&trans  &trans  &trans                                                                         &lt 3 SPACE  &trans  &trans
 			>;
@@ -260,7 +260,7 @@
 		
 		// -----------------------------------------------------------------------------------------
 		// | ESC   |  NO  |  NO  |  NO  |  NO  |  NO  |   | PREV | PLAY | NEXT | MUTE | VOL- | VOL+ |
-		// | TAB   |  NO  | CTRL | CMD  | ALT  |  NO  |   | LEFT |  UP  | DOWN | RIGHT |  NO  |  NO  |
+		// | TAB   |  NO  | NO | NO  | NO  |  NO  |   | LEFT |  UP  | DOWN | RIGHT |  NO  |  NO  |
 		// | SHIFT |  NO  |  NO  |  NO  |  NO  | CAPS |   | SPACE | LEFT |  NO  | RIGHT |  NO  |  NO  |
 		//                    | NO | NO | NO |   | NO | NO | NO |
 		media {

@@ -6,105 +6,173 @@ const path = require('path');
  */
 function scadStr(s) {
   return s
-    .replace(/\\/g, '\\\\')   // backslash first
-    .replace(/"/g, '\\"')      // double quote
-    .replace(/\n/g, '\\n')     // newline
-    .replace(/\t/g, '\\t')     // tab
-    .replace(/\r/g, '\\r');    // carriage return
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\t/g, '\\t')
+    .replace(/\r/g, '\\r');
+}
+
+/**
+ * Convert a resolved label to a SCAD argument expression.
+ *   "$ic_shf"  → ic_shf          (unquoted variable reference)
+ *   "BT0"      → str(ic_bt,"")   (bluetooth icon + empty)
+ *   "BT3"      → str(ic_bt," 3") (bluetooth icon + number)
+ *   "BT-CLR"   → str(ic_bt," clr")
+ *   "hello"    → "hello"          (quoted string literal)
+ */
+function scadArg(label) {
+  if (!label) return '""';
+  if (/^\$[a-z_]/i.test(label)) return label.slice(1);
+  const btSel = label.match(/^BT(\d)$/);
+  if (btSel) {
+    const n = btSel[1];
+    return n === '0' ? 'str(ic_bt,"")' : `str(ic_bt," ${n}")`;
+  }
+  if (label === 'BT-CLR') return 'str(ic_bt," clr")';
+  if (label === 'BT-ALL') return 'str(ic_bt," clr all")';
+  if (label === 'BT\u25c0') return 'str(ic_bt," prv")';
+  if (label === 'BT\u25b6') return 'str(ic_bt," nxt")';
+  return `"${scadStr(label)}"`;
 }
 
 /**
  * Build the full OpenSCAD source string from keymap data and config.
  */
 function buildScad(keymapData, config) {
-  const { print, key, legends } = config;
-  const lh  = print.layerHeight;
-  const ph  = key.plateHeight;
-  const gap = key.gap;
-  const kw  = key.width;
-  const kh  = key.height;
+  const { key, legends, colors = {}, icons = {} } = config;
+  const kw       = key.width;
+  const kh       = key.height;
+  const r        = key.radius;
+  const ph       = key.plateHeight;
+  const gap      = key.gap;
+  const halveGap = key.halveGap || 0;
 
-  const primaryH   = legends.primaryLayers   * lh;
-  const secondaryH = legends.secondaryLayers * lh;
-  // Legends start at z=0 (key face on print bed). Swap before secondary legends finish.
-  const swapH      = +(secondaryH / 2).toFixed(4);
+  const {
+    primaryDepth, secondaryDepth, thirdDepth,
+    primaryFontSize, secondaryFontSize, thirdFontSize,
+    font, smallFont, pYOffset = 0,
+  } = legends;
+
+  const baseColor   = colors.base   || 'black';
+  const legendColor = colors.legend || 'white';
+  const accentColor = colors.accent || 'gray';
 
   const lines = [];
 
   // ── Parameters
   lines.push('// === Parameters ===');
-  lines.push(`key_w              = ${kw};`);
-  lines.push(`key_h              = ${kh};`);
-  lines.push(`key_radius         = ${key.radius};`);
-  lines.push(`plate_h            = ${ph};`);
-  lines.push(`layer_h            = ${lh};`);
-  lines.push(`primary_layers     = ${legends.primaryLayers};   // × layer_h = ${primaryH}mm`);
-  lines.push(`secondary_layers   = ${legends.secondaryLayers}; // × layer_h = ${secondaryH}mm`);
-  lines.push(`key_gap            = ${gap};`);
-  lines.push(`primary_font_size  = ${legends.primaryFontSize};`);
-  lines.push(`secondary_font_size= ${legends.secondaryFontSize};`);
-  lines.push(`font               = "${legends.font}";`);
+  lines.push(`key_w               = ${kw};`);
+  lines.push(`key_h               = ${kh};`);
+  lines.push(`key_radius          = ${r};`);
+  lines.push(`plate_h             = ${ph};`);
+  lines.push(`font                = "${scadStr(font)}";`);
+  lines.push(`small_font          = "${scadStr(smallFont)}";`);
+  lines.push('');
+  lines.push(`primary_depth       = ${primaryDepth};`);
+  lines.push(`secondary_depth     = ${secondaryDepth};`);
+  lines.push(`third_depth         = ${thirdDepth};`);
+  lines.push('');
+  lines.push(`primary_font_size   = ${primaryFontSize};`);
+  lines.push(`secondary_font_size = ${secondaryFontSize};`);
+  lines.push(`third_font_size     = ${thirdFontSize};`);
+  lines.push('');
+  lines.push(`p_y_offset          = ${pYOffset};`);
   lines.push('');
 
-  // ── Colour layering guide
-  lines.push('// === Colour layering guide ===');
-  lines.push(`// Print FACE DOWN (key face on print bed). Start with contrast filament, swap to base colour at:`);
-  lines.push(`// Filament swap at: ${swapH}mm  (secondary_layers * layer_h / 2)`);
-  lines.push('// At this height:');
-  lines.push(`//   Secondary (corner) legends are ~50% printed → faded`);
-  lines.push(`//   Primary legends are ~${Math.round((secondaryH / 2 / primaryH) * 100)}% started → predominantly contrast colour`);
-  lines.push('// Use your slicer\'s "pause at layer" / "colour change" feature at the swap height above.');
+  // ── Icon variables
+  if (Object.keys(icons).length > 0) {
+    lines.push('// --- Icon variables ---');
+    for (const [name, value] of Object.entries(icons)) {
+      lines.push(`${name.padEnd(10)} = "${scadStr(value)}";`);
+    }
+    lines.push('');
+  }
+
+  // ── MMU export guide
+  lines.push('// === MMU export ===');
+  lines.push('// Two materials: base plate (black) + legend inserts (white/gray).');
+  lines.push('// Export as colored 3MF:');
+  lines.push('//   openscad --export-format 3mf -o output.3mf output.scad');
+  lines.push('// Open in PrusaSlicer / BambuStudio / OrcaSlicer and assign extruders by color.');
   lines.push('');
 
   // ── Modules
   lines.push('// === Modules ===');
   lines.push('');
   lines.push('module rounded_rect(w, h, r, height) {');
-  lines.push('  translate([-w/2, -h/2, 0])');
-  lines.push('  hull() {');
-  lines.push('    translate([r,   r,   0]) cylinder(h=height, r=r, $fn=32);');
-  lines.push('    translate([w-r, r,   0]) cylinder(h=height, r=r, $fn=32);');
-  lines.push('    translate([r,   h-r, 0]) cylinder(h=height, r=r, $fn=32);');
-  lines.push('    translate([w-r, h-r, 0]) cylinder(h=height, r=r, $fn=32);');
-  lines.push('  }');
+  lines.push('    translate([-w/2, -h/2, 0])');
+  lines.push('    hull() {');
+  lines.push('        translate([r,   r,   0]) cylinder(h=height, r=r, $fn=32);');
+  lines.push('        translate([w-r, r,   0]) cylinder(h=height, r=r, $fn=32);');
+  lines.push('        translate([r,   h-r, 0]) cylinder(h=height, r=r, $fn=32);');
+  lines.push('        translate([w-r, h-r, 0]) cylinder(h=height, r=r, $fn=32);');
+  lines.push('    }');
   lines.push('}');
   lines.push('');
-  lines.push('module key_cap (primary, top_left, top_right, bottom_right) {');
-  lines.push('  // Base plate — printed face down; legends start at z=0 (key face on print bed)');
-  lines.push('  rounded_rect(key_w, key_h, key_radius, plate_h);');
-  lines.push('  // Primary legend — centered, tall (contrast colour, at key face)');
-  lines.push('  linear_extrude(primary_layers * layer_h)');
-  lines.push('    text(primary, size=primary_font_size, font=font, halign="center", valign="center");');
-  lines.push('  // Corner legends — small, short (faded, at key face)');
-  lines.push('  translate([-(key_w/2 - 2), key_h/2 - 3, 0])');
-  lines.push('    linear_extrude(secondary_layers * layer_h)');
-  lines.push('      text(top_left, size=secondary_font_size, font=font, halign="left", valign="top");');
-  lines.push('  translate([key_w/2 - 2, key_h/2 - 3, 0])');
-  lines.push('    linear_extrude(secondary_layers * layer_h)');
-  lines.push('      text(top_right, size=secondary_font_size, font=font, halign="right", valign="top");');
-  lines.push('  translate([key_w/2 - 2, -(key_h/2 - 3), 0])');
-  lines.push('    linear_extrude(secondary_layers * layer_h)');
-  lines.push('      text(bottom_right, size=secondary_font_size, font=font, halign="right", valign="bottom");');
+  lines.push('module key_cap (p, tl, tr, bottom) {');
+  lines.push('    offset_val = 1.5;');
+  lines.push('');
+  lines.push(`    // 1. The Plate (${baseColor})`);
+  lines.push(`    color("${baseColor}") difference() {`);
+  lines.push('        rounded_rect(key_w, key_h, key_radius, plate_h);');
+  lines.push('        translate([0, 0, -0.01]) {');
+  lines.push('            // Primary Cutout (with Y-offset)');
+  lines.push('            if (p != "") translate([0, p_y_offset, 0])');
+  lines.push('                linear_extrude(primary_depth + 0.01)');
+  lines.push('                    text(p, size=primary_font_size, font=font, halign="center", valign="center");');
+  lines.push('            // Secondary Cutout');
+  lines.push('            linear_extrude(secondary_depth + 0.01) {');
+  lines.push('                if (tl != "") translate([-(key_w/2-offset_val), key_h/2-offset_val, 0]) text(tl, size=secondary_font_size, font=font, halign="left",  valign="top");');
+  lines.push('                if (tr != "") translate([ key_w/2-offset_val,  key_h/2-offset_val, 0]) text(tr, size=secondary_font_size, font=font, halign="right", valign="top");');
+  lines.push('            }');
+  lines.push('            // Third depth Cutout');
+  lines.push('            if (bottom != "") translate([0, -(key_h/2 - offset_val), 0])');
+  lines.push('                linear_extrude(third_depth + 0.01)');
+  lines.push('                    text(bottom, size=third_font_size, font=small_font, halign="center", valign="bottom");');
+  lines.push('        }');
+  lines.push('    }');
+  lines.push('');
+  lines.push(`    // 2. The Legends (${legendColor} & ${accentColor})`);
+  lines.push(`    color("${legendColor}") {`);
+  lines.push('        if (p != "") translate([0, p_y_offset, 0])');
+  lines.push('            linear_extrude(primary_depth)');
+  lines.push('                text(p, size=primary_font_size, font=font, halign="center", valign="center");');
+  lines.push('        // Secondary Inserts');
+  lines.push('        linear_extrude(secondary_depth) {');
+  lines.push('            if (tl != "") translate([-(key_w/2-offset_val), key_h/2-offset_val, 0]) text(tl, size=secondary_font_size, font=font, halign="left",  valign="top");');
+  lines.push('            if (tr != "") translate([ key_w/2-offset_val,  key_h/2-offset_val, 0]) text(tr, size=secondary_font_size, font=font, halign="right", valign="top");');
+  lines.push('        }');
+  lines.push('    }');
+  lines.push('');
+  lines.push(`    // Third depth Insert (${accentColor})`);
+  lines.push(`    color("${accentColor}") {`);
+  lines.push('        if (bottom != "") translate([0, -(key_h/2 - offset_val+0.5), 0])');
+  lines.push('            linear_extrude(third_depth)');
+  lines.push('                text(bottom, size=third_font_size, font=small_font, halign="center", valign="bottom");');
+  lines.push('    }');
   lines.push('}');
   lines.push('');
 
   // ── Plate
-  lines.push('// === Plate ===');
+  lines.push('// === Layout ===');
+  lines.push('mirror([1, 0, 0]) {');
+
   const { layerNames, keys } = keymapData;
-  // Layer indices: 0=base, 1=top-left, 2=top-right, 3=bottom-right
   const [l0, l1, l2, l3] = layerNames;
 
-  for (const key of keys) {
-    if (key.empty) continue;
-    const x = key.col * (kw + gap);
-    const y = -(key.row * (kh + gap));
-    const primary     = scadStr(key.layers[l0] || '');
-    const topLeft     = scadStr(key.layers[l1] || '');
-    const topRight    = scadStr(key.layers[l2] || '');
-    const bottomRight = scadStr(key.layers[l3] || '');
-    lines.push(`translate([${x}, ${y}, 0]) key_cap("${primary}", "${topLeft}", "${topRight}", "${bottomRight}");`);
+  for (const k of keys) {
+    if (k.empty) continue;
+    const x      = k.col * (kw + gap) + (k.col >= 6 ? halveGap : 0);
+    const y      = -(k.row * (kh + gap));
+    const p      = scadArg(k.layers[l0] || '');
+    const tl     = scadArg(k.layers[l1] || '');
+    const tr     = scadArg(k.layers[l2] || '');
+    const bottom = scadArg(k.layers[l3] || '');
+    lines.push(`    translate([${x}, ${y}, 0]) key_cap(${p}, ${tl}, ${tr}, ${bottom});`);
   }
 
+  lines.push('}');
   return lines.join('\n') + '\n';
 }
 
@@ -114,9 +182,9 @@ if (require.main === module) {
   const keymapPath  = path.resolve('keymap.json');
   const outputPath  = path.resolve('output.scad');
   try {
-    const config      = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const keymapData  = JSON.parse(fs.readFileSync(keymapPath, 'utf8'));
-    const scad        = buildScad(keymapData, config);
+    const config     = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    const keymapData = JSON.parse(fs.readFileSync(keymapPath, 'utf8'));
+    const scad       = buildScad(keymapData, config);
     fs.writeFileSync(outputPath, scad);
     console.log(`Written to ${outputPath}`);
   } catch (err) {
@@ -125,4 +193,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { buildScad };
+module.exports = { buildScad, scadArg };
