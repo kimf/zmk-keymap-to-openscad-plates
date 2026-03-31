@@ -1,0 +1,32 @@
+{
+  "name": "keebs-web",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev":   "vite",
+    "build": "vite build",
+    "test":  "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@react-three/drei":  "^9.115.0",
+    "@react-three/fiber": "^8.17.0",
+    "@fontsource/fira-code":   "^5.0.0",
+    "@fontsource/staatliches": "^5.0.0",
+    "fflate":    "^0.8.2",
+    "react":     "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three":     "^0.172.0",
+    "zustand":   "^4.5.5"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom":  "^6.6.3",
+    "@testing-library/react":     "^16.0.0",
+    "@types/three":               "^0.172.0",
+    "@vitejs/plugin-react":       "^4.3.4",
+    "jsdom":    "^25.0.1",
+    "vite":     "^5.4.11",
+    "vitest":   "^2.1.8"
+  }
+}
