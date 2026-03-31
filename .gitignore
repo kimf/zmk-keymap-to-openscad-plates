@@ -3,3 +3,4 @@ keymap.json
 output.*
 .superpowers/
 .DS_Store
+web/public/fonts/HackNerdFontMono-Regular.woff2
