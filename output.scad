@@ -18,15 +18,15 @@ third_font_size     = 2;
 p_y_offset          = 0;
 
 // --- Icon variables ---
-ic_bt      = "";
-ic_mute    = "";
-ic_v_dn    = "";
-ic_v_up    = "";
-ic_play    = "";
-ic_prev    = "";
-ic_next    = "";
-ic_back    = "⌫";
-ic_del     = "⌦";
+ic_bt      = "";
+ic_mute    = "";
+ic_v_dn    = "";
+ic_v_up    = "";
+ic_play    = "";
+ic_prev    = "";
+ic_next    = "";
+ic_back    = "←";
+ic_del     = "→";
 ic_ent     = "↵";
 ic_tab     = "⇥";
 ic_shf     = "⇧";
