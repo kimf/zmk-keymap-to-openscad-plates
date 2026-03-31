@@ -29,4 +29,12 @@ export default {
   SV_DQT:         '"',
   SV_N0: '0', SV_N1: '1', SV_N2: '2', SV_N3: '3', SV_N4: '4',
   SV_N5: '5', SV_N6: '6', SV_N7: '7', SV_N8: '8', SV_N9: '9',
+
+  // Modifier + key combinations for Swedish Mac keyboard (AltGr = LA / Option)
+  'LA(SV_N4)':        '$',  // Option+4
+  'LA(SV_N7)':        '|',  // Option+7
+  'LA(SV_N8)':        '[',  // Option+8
+  'LA(SV_N9)':        ']',  // Option+9
+  'LS(LA(SV_N8))':    '{',  // Shift+Option+8
+  'LS(LA(SV_N9))':    '}',  // Shift+Option+9
 };

@@ -30,8 +30,13 @@ test('&trans → empty string',            () => assert.equal(resolveBinding('&t
 test('&none → empty string',             () => assert.equal(resolveBinding('&none', ctx),               ''));
 test('&sk LSHIFT → SHF',                () => assert.equal(resolveBinding('&sk LSHIFT', ctx),          'SHF'));
 test('&caps_word → CAPS',               () => assert.equal(resolveBinding('&caps_word', ctx),          'CAPS'));
-test('&kp LS(LA(SV_N8)) → 8',           () => assert.equal(resolveBinding('&kp LS(LA(SV_N8))', ctx),  '8'));
-test('&kp LA(SV_N7) → 7',               () => assert.equal(resolveBinding('&kp LA(SV_N7)', ctx),      '7'));
+// Swedish Mac modifier+key combos (AltGr / Option changes the character entirely)
+test('&kp LA(SV_N4) → $',               () => assert.equal(resolveBinding('&kp LA(SV_N4)', ctx),      '$'));
+test('&kp LA(SV_N7) → |',               () => assert.equal(resolveBinding('&kp LA(SV_N7)', ctx),      '|'));
+test('&kp LA(SV_N8) → [',               () => assert.equal(resolveBinding('&kp LA(SV_N8)', ctx),      '['));
+test('&kp LA(SV_N9) → ]',               () => assert.equal(resolveBinding('&kp LA(SV_N9)', ctx),      ']'));
+test('&kp LS(LA(SV_N8)) → {',           () => assert.equal(resolveBinding('&kp LS(LA(SV_N8))', ctx),  '{'));
+test('&kp LS(LA(SV_N9)) → }',           () => assert.equal(resolveBinding('&kp LS(LA(SV_N9))', ctx),  '}'));
 test('&bt BT_SEL 0 → BT0',              () => assert.equal(resolveBinding('&bt BT_SEL 0', ctx),        'BT0'));
 test('&bt BT_SEL 4 → BT4',              () => assert.equal(resolveBinding('&bt BT_SEL 4', ctx),        'BT4'));
 test('&bt BT_CLR → BT-CLR',             () => assert.equal(resolveBinding('&bt BT_CLR', ctx),          'BT-CLR'));
