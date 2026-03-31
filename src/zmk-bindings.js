@@ -14,14 +14,21 @@ function stripModifiers(token) {
 }
 
 /**
- * Resolve a key name to its display label.
- * Checks sv-keys first, then labelOverrides, then returns the name as-is (lowercased).
+ * Resolve a key token to its display label.
+ * Accepts the raw token (possibly with modifiers like LA(SV_N8)).
+ * Checks sv-keys first (including modifier-combo entries), then labelOverrides,
+ * then strips modifiers and retries, then returns the inner name as-is.
  */
-function resolveKey(name, overrides) {
-  if (svKeys[name] !== undefined)    return svKeys[name];
-  if (overrides[name] !== undefined) return overrides[name];
-  // Single letters stay as-is; multi-word names are returned verbatim
-  return name;
+function resolveKey(raw, overrides) {
+  // 1. Check the full expression (handles modifier combos like LA(SV_N8) → '[')
+  if (svKeys[raw] !== undefined)    return svKeys[raw];
+  if (overrides[raw] !== undefined) return overrides[raw];
+  // 2. Strip modifiers and retry
+  const inner = stripModifiers(raw);
+  if (svKeys[inner] !== undefined)    return svKeys[inner];
+  if (overrides[inner] !== undefined) return overrides[inner];
+  // 3. Return the innermost key name as-is
+  return inner;
 }
 
 /**
@@ -40,21 +47,18 @@ function resolveBinding(binding, ctx) {
   if (head === '&msc' || head === '&inc_dec_kp') return '';
 
   if (head === '&kp' || head === '&sk') {
-    const raw   = parts[1];                 // only the key token, not any trailing macro refs
-    const inner = stripModifiers(raw);
-    return resolveKey(inner, overrides);
+    const raw = parts[1];   // only the key token, not any trailing macro refs
+    return resolveKey(raw, overrides);
   }
 
   if (head === '&mt') {
     // &mt MOD TAP — show tap action (last token)
-    const tap = stripModifiers(parts[parts.length - 1]);
-    return resolveKey(tap, overrides);
+    return resolveKey(parts[parts.length - 1], overrides);
   }
 
   if (head === '&lt') {
     // &lt LAYER TAP — show tap action (last token)
-    const tap = stripModifiers(parts[parts.length - 1]);
-    return resolveKey(tap, overrides);
+    return resolveKey(parts[parts.length - 1], overrides);
   }
 
   if (head === '&bt') {
