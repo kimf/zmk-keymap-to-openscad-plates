@@ -69,8 +69,7 @@ module key_cap (p, tl, tc, tr, bottom, p_font=primary_font, use_large=false, p_e
     offset_val = 1.5;
     eff_w      = use_large ? alt_shift_key_w : key_w;
     eff_h      = use_large ? alt_shift_key_h : key_h;
-    // Shift primary label down on tall keys so the top margin stays consistent
-    p_y_adj    = p_y_offset + p_extra_y - (use_large ? (alt_shift_key_h - key_h) / 2 : 0);
+    p_y_adj    = p_y_offset + p_extra_y;
 
     // 1. The Plate (black)
     color("black") difference() {
@@ -129,7 +128,7 @@ mirror([1, 0, 0]) {
     translate([190, 0, 0]) key_cap("P",     "`",   "",      "",   ic_v_dn);
     translate([207, 0, 0]) key_cap(ic_back, ic_del,"",      "",   ic_v_up, font);
     // Row -17
-    translate([0,   -17, 0]) key_cap(ic_tab, "",  "",      "",   "",                    font, true, -1.5);
+    translate([0,   -19.7, 0]) key_cap(ic_tab, "",  "",      "",   "",                    font, true);
     translate([17,  -17, 0]) key_cap("A",    "<",  "",      "",   "");
     translate([34,  -17, 0]) key_cap("S",    ">",  "",      "",   "");
     translate([51,  -17, 0]) key_cap("D",    "}",  "",      "4",  "");
@@ -149,10 +148,10 @@ mirror([1, 0, 0]) {
     translate([85,  -34, 0]) key_cap("B",   "@",   "",      "9",  "caps");
     translate([122, -34, 0]) key_cap("N",   "~",   "",      "%",  "space");
     translate([139, -34, 0]) key_cap("M",   "=",   "",      "",   "");
-    translate([156, -34, 0]) key_cap(",",   "",    "",      "",   "");
-    translate([173, -34, 0]) key_cap(".",   "",    "",      "",   "");
+    translate([156, -34, 0]) key_cap(",",   "",    ";",     "",   "",   primary_font, false, -1);
+    translate([173, -34, 0]) key_cap(".",   "",    ":",     "",   "",   primary_font, false, -1);
     translate([190, -34, 0]) key_cap("↑",   ic_pgu,"",      "",   "",                    font);
-    translate([207, -34, 0]) key_cap("-",   "",    "",      "",   "");
+    translate([207, -34, 0]) key_cap("-",   "",    "_",     "",   "",   primary_font, false, -1);
     // Row -51
     translate([0,   -51, 0]) key_cap(ic_shf,"",    "",      "",   "",                    font, true);
     translate([17,  -51, 0]) key_cap(ic_ctl,    "",    "",   "",   str(ic_bt," clr"),   font);
