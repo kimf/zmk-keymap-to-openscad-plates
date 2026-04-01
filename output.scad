@@ -119,13 +119,13 @@ mirror([1, 0, 0]) {
     translate([17,  0, 0]) key_cap("Q",     "",    "",      "",   str(ic_bt,""));
     translate([34,  0, 0]) key_cap("W",     "",    "",      "",   str(ic_bt,"1"));
     translate([51,  0, 0]) key_cap("E",     "",    "",      "1",  str(ic_bt,"2"));
-    translate([68,  0, 0]) key_cap("R",     "",    "",      "2",  str(ic_bt,"3"));
+    translate([68,  0, 0]) key_cap("R",     "\"",  "",      "2",  str(ic_bt,"3"));
     translate([85,  0, 0]) key_cap("T",     "'",   "",      "3",  str(ic_bt,"4"));
     translate([122, 0, 0]) key_cap("Y",     "!",   "",      "",   ic_prev);
     translate([139, 0, 0]) key_cap("U",     "&",   "",      "",   ic_play);
     translate([156, 0, 0]) key_cap("I",     "$",   "",      "",   ic_next);
-    translate([173, 0, 0]) key_cap("O",     "/",   "",      "|",  ic_mute);
-    translate([190, 0, 0]) key_cap("P",     "`",   "",      "",   ic_v_dn);
+    translate([173, 0, 0]) key_cap("O",     "/",   "",      "\\", ic_mute);
+    translate([190, 0, 0]) key_cap("P",     "|",   "",      "°",  ic_v_dn);
     translate([207, 0, 0]) key_cap(ic_back, ic_del,"",      "",   ic_v_up, font);
     // Row -17
     translate([0,   -19.7, 0]) key_cap(ic_tab, "",  "",      "",   "",                    font, true);
@@ -148,10 +148,10 @@ mirror([1, 0, 0]) {
     translate([85,  -34, 0]) key_cap("B",   "@",   "",      "9",  "caps");
     translate([122, -34, 0]) key_cap("N",   "~",   "",      "%",  "space");
     translate([139, -34, 0]) key_cap("M",   "=",   "",      "",   "");
-    translate([156, -34, 0]) key_cap(",",   "–",   ";",     "",   "",   primary_font, false, -1);
-    translate([173, -34, 0]) key_cap(".",   "—",   ":",     "",   "",   primary_font, false, -1);
+    translate([156, -34, 0]) key_cap(",",   "",    ";",     "",   "",   primary_font, false, -1);
+    translate([173, -34, 0]) key_cap(".",   "",    ":",     "",   "",   primary_font, false, -1);
     translate([190, -34, 0]) key_cap("↑",   ic_pgu,"",      "",   "",                    font);
-    translate([207, -34, 0]) key_cap("-",   "\\",  "_",     "",   "",   primary_font, false, -1);
+    translate([207, -34, 0]) key_cap("-",   "–",   "_",     "—",  "",   primary_font, false, -1);
     // Row -51
     translate([0,   -51, 0]) key_cap(ic_shf,"",    "",      "",   "",                    font, true);
     translate([17,  -51, 0]) key_cap(ic_ctl,    "",    "",   "",   str(ic_bt," clr"),   font);
