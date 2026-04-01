@@ -123,7 +123,7 @@ mirror([1, 0, 0]) {
     translate([85,  0, 0]) key_cap("T",     "'",   "",      "3",  str(ic_bt,"4"));
     translate([122, 0, 0]) key_cap("Y",     "!",   "",      "",   ic_prev);
     translate([139, 0, 0]) key_cap("U",     "&",   "",      "",   ic_play);
-    translate([156, 0, 0]) key_cap("I",     "$",   "",      "",   ic_next);
+    translate([156, 0, 0]) key_cap("I",     "$",   "",      "€",  ic_next);
     translate([173, 0, 0]) key_cap("O",     "/",   "",      "\\", ic_mute);
     translate([190, 0, 0]) key_cap("P",     "|",   "",      "°",  ic_v_dn);
     translate([207, 0, 0]) key_cap(ic_back, ic_del,"",      "",   ic_v_up, font);
