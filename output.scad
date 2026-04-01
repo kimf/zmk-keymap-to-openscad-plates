@@ -155,7 +155,7 @@ mirror([1, 0, 0]) {
     // Row -51
     translate([0,   -51, 0]) key_cap(ic_shf,"",    "",      "",   "",                    font, true);
     translate([17,  -51, 0]) key_cap(ic_ctl,    "",    "",   "",   str(ic_bt," clr"),   font);
-    translate([34,  -51, 0]) key_cap("'",   "$",   "\"",    "§",  str(ic_bt," c all"), primary_font, false, -1);
+    translate([34,  -51, 0]) key_cap("§",   "",    "°",     "",   str(ic_bt," c all"), primary_font, false, -1);
     translate([173, -51, 0]) key_cap("←",   ic_home,"",     "",   str(ic_bt," prv"),     font);
     translate([190, -51, 0]) key_cap("↓",   ic_pgd,"",      "",   "",                    font);
     translate([207, -51, 0]) key_cap("→",   ic_end, "",     "",   str(ic_bt," nxt"),     font);
