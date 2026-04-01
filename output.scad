@@ -21,7 +21,7 @@ alt_shift_key_w               = 16;
 alt_shift_key_h               = 21.4;
 
 // --- Icon variables ---
-ic_bt      = "󰊔"; // nf-fa-bluetooth_b — simple B shape
+ic_bt      = ""; // nf-fa-bluetooth_b — simple B shape
 ic_mute    = ""; // nf-fa-volume_off
 ic_v_dn    = ""; // nf-fa-volume_down
 ic_v_up    = ""; // nf-fa-volume_up
@@ -41,6 +41,8 @@ ic_pgu     = "⇑"; // ⇑ upwards double arrow
 ic_pgd     = "⇓"; // ⇓ downwards double arrow
 ic_home    = "↖"; // ↖
 ic_end     = "↘"; // ↘
+ic_raise   = "󰹍"; // nf-md-layers_plus
+ic_lower   = "󰹌"; // nf-md-layers_minus
 
 // === MMU export ===
 // Two materials: base plate (black) + legend inserts (white/gray).
@@ -63,12 +65,12 @@ module rounded_rect(w, h, r, height) {
 // p_font defaults to primary_font (Staatliches); pass font for icon/arrow primaries.
 // use_large: renders with alt_shift_key_w/h; shifts primary down so top margin
 //            matches a standard key (extra half-height pushed to bottom).
-module key_cap (p, tl, tc, tr, bottom, p_font=primary_font, use_large=false) {
+module key_cap (p, tl, tc, tr, bottom, p_font=primary_font, use_large=false, p_extra_y=0, p_depth=primary_depth) {
     offset_val = 1.5;
     eff_w      = use_large ? alt_shift_key_w : key_w;
     eff_h      = use_large ? alt_shift_key_h : key_h;
     // Shift primary label down on tall keys so the top margin stays consistent
-    p_y_adj    = p_y_offset - (use_large ? (alt_shift_key_h - key_h) / 2 : 0);
+    p_y_adj    = p_y_offset + p_extra_y - (use_large ? (alt_shift_key_h - key_h) / 2 : 0);
 
     // 1. The Plate (black)
     color("black") difference() {
@@ -76,7 +78,7 @@ module key_cap (p, tl, tc, tr, bottom, p_font=primary_font, use_large=false) {
         translate([0, 0, -0.01]) {
             // Primary Cutout
             if (p != "") translate([0, p_y_adj, 0])
-                linear_extrude(primary_depth + 0.01)
+                linear_extrude(p_depth + 0.01)
                     text(p, size=primary_font_size, font=p_font, halign="center", valign="center");
             // Secondary Cutout (tl, tc, tr share same depth)
             linear_extrude(secondary_depth + 0.01) {
@@ -91,10 +93,10 @@ module key_cap (p, tl, tc, tr, bottom, p_font=primary_font, use_large=false) {
         }
     }
 
-    // 2. The Legends (white)
-    color("white") {
+    // 2. The Legends (white / silver when faded)
+    color(p_depth < primary_depth ? "silver" : "white") {
         if (p != "") translate([0, p_y_adj, 0])
-            linear_extrude(primary_depth)
+            linear_extrude(p_depth)
                 text(p, size=primary_font_size, font=p_font, halign="center", valign="center");
         linear_extrude(secondary_depth) {
             if (tl != "") translate([-(eff_w/2-offset_val), eff_h/2-offset_val, 0]) text(tl, size=secondary_font_size, font=font, halign="left",   valign="top");
@@ -127,7 +129,7 @@ mirror([1, 0, 0]) {
     translate([190, 0, 0]) key_cap("P",     "`",   "",      "",   ic_v_dn);
     translate([207, 0, 0]) key_cap(ic_back, ic_del,"",      "",   ic_v_up, font);
     // Row -17
-    translate([0,   -17, 0]) key_cap(ic_tab, "",  "",      "",   "",                    font, true);
+    translate([0,   -17, 0]) key_cap(ic_tab, "",  "",      "",   "",                    font, true, -1.5);
     translate([17,  -17, 0]) key_cap("A",    "<",  "",      "",   "");
     translate([34,  -17, 0]) key_cap("S",    ">",  "",      "",   "");
     translate([51,  -17, 0]) key_cap("D",    "}",  "",      "4",  "");
@@ -161,8 +163,8 @@ mirror([1, 0, 0]) {
     // Row -68
     translate([34,  -68, 0]) key_cap(ic_opt,   "",    "",   "",   "",                  font);
     translate([51,  -68, 0]) key_cap(ic_cmd,   "",    "",   "",   "",                  font);
-    translate([68,  -68, 0]) key_cap("", "",    "lower", "",   "",                    font);
-    translate([122, -68, 0]) key_cap("" ,"",    "raise", "",   "",                    font);
+    translate([68,  -68, 0]) key_cap(ic_lower, "", "",   "",   "",                    font, false, 0, secondary_depth);
+    translate([122, -68, 0]) key_cap(ic_raise, "", "",   "",   "",                    font, false, 0, secondary_depth);
     translate([139, -68, 0]) key_cap(ic_ent,"shift",    "",      "",   "",                    font);
     translate([156, -68, 0]) key_cap(ic_ctl,    "",    "",   "",   "",                  font);
 }
