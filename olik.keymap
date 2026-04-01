@@ -166,31 +166,31 @@
 		
 		combo_aring {
 			/* Ö + Ä => Å. */
-			timeout-ms = <10>;
+			timeout-ms = <30>;
 			key-positions = <23 24>;
 			bindings = <&kp SV_A_RING>;
 			layers = <0>;
 		};
-		
+
 		combo_pa {
 			/* P + Ö => PÅ. */
-			timeout-ms = <10>;
+			timeout-ms = <30>;
 			key-positions = <10 23>;
 			bindings = <&macro_pa>;
 			layers = <0>;
 		};
-		
+
 		combo_email_username {
 			/* I + K => kim.fransman. */
-			timeout-ms = <10>;
+			timeout-ms = <30>;
 			key-positions = <8 21>;
 			bindings = <&macro_kim_fransman>;
 			layers = <0>;
 		};
-		
+
 		combo_gmail_com {
 			/* G + M => gmail.com. */
-			timeout-ms = <10>;
+			timeout-ms = <30>;
 			key-positions = <17 31>;
 			bindings = <&macro_gmail>;
 			layers = <0>;
@@ -223,7 +223,7 @@
 		// -----------------------------------------------------------------------------------------
 		// | ESC   |     |     |     |     |  '   |          |  !  |  &  |  $  |  /  |  `     | DEL |
 		// | TAB   |  <  |  >   |  }  |  ]  |  )  |   SCROLL | (   |  [  |  {  |  +  |  #     |  ?  |
-		// |       |   ´  |  ¤   |     |  ^  |  @  |          |  ~  |  =  |  ,  |  .  |  PGUP  |  -   |
+		// |       |      |      |  ´  |  ^  |  @  |          |  ~  |  =  |  –  |  —  |  PGUP  |  \   |
 		// | SHIFT |  CTRL | € |                                                 | HOME | PGDOWN | END|
 		//                     | ALT | GUI | SPACE |        | SPACE (MEDIA) | LSENTER | SHIFT |
 		sym {
@@ -231,8 +231,8 @@
 			bindings = <
 			&trans  &trans        	&trans          &trans              &trans         &quote_morph                  &kp SV_EXCL      &kp SV_AMPS  &kp SV_DLLR  &kp SV_SLASH &kp GRAVE      &kp DELETE
 			&trans  &open_croc_td   &close_croc_td  &kp LS(LA(SV_N9))   &kp LA(SV_N9)  &kp SV_RPAR           &trans  &lpar_td         &lbkt_td     &lbrc_td     &kp SV_PLUS  &kp SV_HASH    &kp SV_QMARK
-			&trans                	&trans          &kp SV_ACUTE        &kp SV_CARET   &at_gmail_td                  &tilde_home_td   &kp SV_EQUAL &trans       &trans       &kp PAGE_UP    &trans
-			&trans  &trans  &kp LA(SV_N4)                                                                                                                     &kp HOME     &kp PAGE_DOWN  &kp END
+			&trans                	&trans          &kp SV_ACUTE        &kp SV_CARET   &at_gmail_td                  &tilde_home_td   &kp SV_EQUAL &kp LA(SV_MINUS)  &kp LS(LA(SV_MINUS))  &kp PAGE_UP    &kp LS(LA(SV_N7))
+			&trans  &trans  &kp LA(SV_N4)                                                                                                                    &kp HOME     &kp PAGE_DOWN  &kp END
 			&trans  &trans  &trans                                                                         &lt 3 SPACE  &trans  &trans
 			>;
 			

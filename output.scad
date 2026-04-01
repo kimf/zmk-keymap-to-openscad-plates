@@ -148,10 +148,10 @@ mirror([1, 0, 0]) {
     translate([85,  -34, 0]) key_cap("B",   "@",   "",      "9",  "caps");
     translate([122, -34, 0]) key_cap("N",   "~",   "",      "%",  "space");
     translate([139, -34, 0]) key_cap("M",   "=",   "",      "",   "");
-    translate([156, -34, 0]) key_cap(",",   "",    ";",     "",   "",   primary_font, false, -1);
-    translate([173, -34, 0]) key_cap(".",   "",    ":",     "",   "",   primary_font, false, -1);
+    translate([156, -34, 0]) key_cap(",",   "–",   ";",     "",   "",   primary_font, false, -1);
+    translate([173, -34, 0]) key_cap(".",   "—",   ":",     "",   "",   primary_font, false, -1);
     translate([190, -34, 0]) key_cap("↑",   ic_pgu,"",      "",   "",                    font);
-    translate([207, -34, 0]) key_cap("-",   "",    "_",     "",   "",   primary_font, false, -1);
+    translate([207, -34, 0]) key_cap("-",   "\\",  "_",     "",   "",   primary_font, false, -1);
     // Row -51
     translate([0,   -51, 0]) key_cap(ic_shf,"",    "",      "",   "",                    font, true);
     translate([17,  -51, 0]) key_cap(ic_ctl,    "",    "",   "",   str(ic_bt," clr"),   font);
