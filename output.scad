@@ -1,8 +1,8 @@
 // === Parameters ===
-key_w               = 16;
-key_h               = 16;
+key_w               = 14.7;
+key_h               = 14.7;
 key_radius          = 2;
-plate_h             = 0.8;
+plate_h             = 0.4;
 primary_font        = "Staatliches:style=Regular";
 font                = "Hack Nerd Font Mono:style=Bold";
 small_font          = "Hack Nerd Font";
@@ -11,14 +11,14 @@ primary_depth       = 0.4;
 secondary_depth     = 0.2;
 third_depth         = 0.1;
 
-primary_font_size   = 6.5;
-secondary_font_size = 3.1;
-third_font_size     = 2;
+primary_font_size   = 5.5;
+secondary_font_size = 3.5;
+third_font_size     = 2.3;
 
 p_y_offset          = 0;
 
 alt_shift_key_w               = 16;
-alt_shift_key_h               = 21.4;
+alt_shift_key_h               = 21.8;
 
 // --- Icon variables ---
 ic_bt      = ""; // nf-fa-bluetooth_b — simple B shape
@@ -53,13 +53,34 @@ ic_lower   = "󰹌"; // nf-md-layers_minus
 // === Modules ===
 
 module rounded_rect(w, h, r, height) {
+    c_bot = 0.4;  // Bottom chamfer
+    c_top = 0.1;  // Top chamfer
+
+    // We use hull to connect four layers of corner cylinders
     translate([-w/2, -h/2, 0])
     hull() {
-        translate([r,   r,   0]) cylinder(h=height, r=r, $fn=32);
-        translate([w-r, r,   0]) cylinder(h=height, r=r, $fn=32);
-        translate([r,   h-r, 0]) cylinder(h=height, r=r, $fn=32);
-        translate([w-r, h-r, 0]) cylinder(h=height, r=r, $fn=32);
+        // LAYER 1: The very bottom face (shrunk by c_bot)
+        corners(0, r - c_bot, w, h, r);
+        
+        // LAYER 2: The end of the bottom chamfer (full radius r)
+        corners(c_bot, r, w, h, r);
+        
+        // LAYER 3: The start of the top chamfer (full radius r)
+        corners(height - c_top, r, w, h, r);
+        
+        // LAYER 4: The very top face (shrunk by c_top)
+        corners(height, r - c_top, w, h, r);
     }
+}
+
+// Helper module to keep the code clean and avoid repeating the 4 translates
+module corners(z, current_r, w, h, base_r) {
+    // We stay centered on the original radius centers to keep the sides vertical
+    // but we change the radius of the cylinders to create the chamfer slope.
+    translate([base_r, base_r, z]) cylinder(h=0.01, r=current_r, $fn=32);
+    translate([w-base_r, base_r, z]) cylinder(h=0.01, r=current_r, $fn=32);
+    translate([base_r, h-base_r, z]) cylinder(h=0.01, r=current_r, $fn=32);
+    translate([w-base_r, h-base_r, z]) cylinder(h=0.01, r=current_r, $fn=32);
 }
 
 // p_font defaults to primary_font (Staatliches); pass font for icon/arrow primaries.
@@ -86,9 +107,7 @@ module key_cap (p, tl, tc, tr, bottom, p_font=primary_font, use_large=false, p_e
                 if (tr != "") translate([ eff_w/2-offset_val,   eff_h/2-offset_val, 0]) text(tr, size=secondary_font_size, font=font, halign="right",  valign="top");
             }
             // Bottom label Cutout
-            if (bottom != "") translate([0, -(eff_h/2 - offset_val), 0])
-                linear_extrude(third_depth + 0.01)
-                    text(bottom, size=third_font_size, font=small_font, halign="center", valign="bottom");
+   
         }
     }
 
@@ -104,12 +123,7 @@ module key_cap (p, tl, tc, tr, bottom, p_font=primary_font, use_large=false, p_e
         }
     }
 
-    // Bottom label Insert (gray)
-    color("gray") {
-        if (bottom != "") translate([0, -(eff_h/2 - offset_val + 0.5), 0])
-            linear_extrude(third_depth)
-                text(bottom, size=third_font_size, font=small_font, halign="center", valign="bottom");
-    }
+ 
 }
 
 // === Layout ===
@@ -117,10 +131,10 @@ mirror([1, 0, 0]) {
     // Row 0
     translate([0,   0, 0]) key_cap("ESC",   "",    "",      "",   "");
     translate([17,  0, 0]) key_cap("Q",     "",    "",      "",   str(ic_bt,""));
-    translate([34,  0, 0]) key_cap("W",     "",    "",      "",   str(ic_bt,"1"));
-    translate([51,  0, 0]) key_cap("E",     "",    "",      "1",  str(ic_bt,"2"));
-    translate([68,  0, 0]) key_cap("R",     "\"",  "",      "2",  str(ic_bt,"3"));
-    translate([85,  0, 0]) key_cap("T",     "'",   "",      "3",  str(ic_bt,"4"));
+    translate([34,  0, 0]) key_cap("W",     "",    "",      "",   str(ic_bt,""));
+    translate([51,  0, 0]) key_cap("E",     "",    "",      "1",  str(ic_bt,""));
+    translate([68,  0, 0]) key_cap("R",     "\"",  "",      "2",  str(ic_bt,""));
+    translate([85,  0, 0]) key_cap("T",     "'",   "",      "3",  str(ic_bt,""));
     translate([122, 0, 0]) key_cap("Y",     "!",   "",      "",   ic_prev);
     translate([139, 0, 0]) key_cap("U",     "&",   "",      "",   ic_play);
     translate([156, 0, 0]) key_cap("I",     "$",   "",      "€",  ic_next);
@@ -150,7 +164,7 @@ mirror([1, 0, 0]) {
     translate([139, -34, 0]) key_cap("M",   "=",   "",      "",   "");
     translate([156, -34, 0]) key_cap(",",   "",    ";",     "",   "",   primary_font, false, -1);
     translate([173, -34, 0]) key_cap(".",   "",    ":",     "",   "",   primary_font, false, -1);
-    translate([190, -34, 0]) key_cap("↑",   ic_pgu,"",      "",   "",                    font);
+    translate([190, -34, 0]) key_cap("↑",   ic_pgu,"",      "",   "",   font);
     translate([207, -34, 0]) key_cap("-",   "–",   "_",     "—",  "",   primary_font, false, -1);
     // Row -51
     translate([0,   -51, 0]) key_cap(ic_shf,"",    "",      "",   "",                    font, true);
